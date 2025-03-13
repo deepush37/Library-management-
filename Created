@@ -1,0 +1,146 @@
+#include<stdio.h>
+#include<stdlib.h>
+#include<string.h>
+struct Book {
+    char bookname[50];
+    char author[50];
+    int noofpages;
+    float price;
+    struct Book *next;
+};
+struct Book* createBookNode() {
+    struct Book* newBook = (struct Book*)malloc(sizeof(struct Book));
+    if (newBook == NULL) {
+        printf("Memory allocation failed.\n");
+        exit(1);
+    }
+    newBook->next = NULL;
+    return newBook;
+}
+void addBook(struct Book **head) {
+    struct Book* newBook = createBookNode();
+
+    printf("=========================\n");
+    printf("Enter book name: ");
+    fgets(newBook->bookname, sizeof(newBook->bookname), stdin);
+    newBook->bookname[strcspn(newBook->bookname, "\n")] = 0;
+
+    printf("Enter author name: ");
+    fgets(newBook->author, sizeof(newBook->author), stdin);
+    newBook->author[strcspn(newBook->author, "\n")] = 0;
+
+    printf("Enter number of pages: ");
+    scanf("%d", &newBook->noofpages);
+
+    printf("Enter price: ");
+    scanf("%f", &newBook->price);
+    getchar();
+    newBook->next = *head;
+    *head = newBook;
+
+    printf("===========================\n");
+}
+void displayBooks(struct Book *head) {
+    if (head == NULL) {
+        printf("No books in the library.\n");
+    } else {
+        printf("Books present and their details:\n");
+        struct Book *current = head;
+        while (current != NULL) {
+            printf("================================\n");
+            printf("\tBook name: %s\n", current->bookname);
+            printf("\tAuthor name: %s\n", current->author);
+            printf("\tPages: %d\n", current->noofpages);
+            printf("\tPrice: %.2f\n", current->price);
+            printf("================================\n");
+            current = current->next;
+        }
+    }
+}
+void showBookCount(struct Book *head) {
+    int count = 0;
+    struct Book *current = head;
+    while (current != NULL) {
+        count++;
+        current = current->next;
+    }
+    printf("===========================\n");
+    printf("Number of books in library: %d\n", count);
+    printf("===========================\n");
+}
+void deleteBook(struct Book **head) {
+    char bookToDelete[50];
+    int found = 0;
+
+    printf("Enter the name of the book to delete: ");
+    fgets(bookToDelete, sizeof(bookToDelete), stdin);
+    bookToDelete[strcspn(bookToDelete, "\n")] = 0;
+
+    struct Book *current = *head;
+    struct Book *prev = NULL;
+    while (current != NULL) {
+        if (strcmp(current->bookname, bookToDelete) == 0) {
+            if (prev == NULL) {
+                *head = current->next;
+            } else {
+                prev->next = current->next;
+            }
+            free(current); 
+            found = 1;
+            printf("Book '%s' deleted successfully!\n", bookToDelete);
+            break;
+        }
+        prev = current;
+        current = current->next;
+    }
+
+    if (!found) {
+        printf("No such book is available.\n");
+    }
+}
+void freeLibrary(struct Book *head) {
+    struct Book *current = head;
+    struct Book *nextBook;
+    while (current != NULL) {
+        nextBook = current->next;
+        free(current);
+        current = nextBook;
+    }
+}
+
+int main() {
+    struct Book *head = NULL;
+    int choice = 0;
+
+    while (choice != 5) {
+        printf("1. Add book information\n");
+        printf("2. Display book information\n");
+        printf("3. Number of books in the library\n");
+        printf("4. Delete a book\n");
+        printf("5. Exit\n");
+        printf("Enter one of the above: ");
+        scanf("%d", &choice);
+        getchar();
+        switch (choice) {
+            case 1:
+                addBook(&head);
+                break;
+            case 2:
+                displayBooks(head);
+                break;
+            case 3:
+                showBookCount(head);
+                break;
+            case 4:
+                deleteBook(&head);
+                break;
+            case 5:
+                freeLibrary(head);
+                exit(0);
+            default:
+                printf("Choose a valid input.\n===========================\n");
+        }
+    }
+
+    return 0;
+}
